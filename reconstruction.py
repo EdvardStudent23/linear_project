@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import cv2
 import os
 from scipy import fftpack
+from svd import custom_svd
 
 def load_image(image_path):
     """Simple image loading function."""
@@ -18,13 +19,15 @@ def load_image(image_path):
 
 def fast_svd_filter(image, k=50):
     """Fast SVD-based image filtering."""
-    U, sigma, Vt = np.linalg.svd(image, full_matrices=False)
+    # U, sigma, Vt = np.linalg.svd(image, full_matrices=False)
+    U, sigma, Vt = custom_svd(image)
+
     
     
     sigma_k = np.zeros_like(sigma)
     sigma_k[:k] = sigma[:k]
     
-    return U @ np.diag(sigma_k) @ Vt
+    return (U @ np.diag(sigma_k) @ Vt).astype(np.float32)
 
 def compute_normal_map(image):
     """Compute normal map directly from image using sobel filters."""

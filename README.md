@@ -1,10 +1,37 @@
-# linear_project
+# Terrain Reconstruction from Satellite Images
 
-To run script
+This project implements a **fast shape-from-shading pipeline** using custom **SVD filtering**, gradient integration, and **3D terrain visualization**. It evaluates performance across multiple inputs.
+
+---
+
+## Project Structure
+
+
+---
+
+## Features
+
+- **SVD-based image denoising** with adjustable rank `k`
+- **Normal map estimation** using gradients
+- **Shape from shading** using Lambertian model
+- **3D terrain plot generation** (`matplotlib`)
+- **Performance benchmarking**: execution time, surface variation
+
+---
+
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/EdvardStudent23/linear_project.git
+cd linear_project
+```
+
+### 2. Run the script
 
 ```
 python3 -m venv .venv
-
 source .venv/bin/activate
 
 pip install -r requirements.txt
@@ -12,53 +39,37 @@ pip install -r requirements.txt
 python3 reconstruction.py
 ```
 
-# Shape-from-Shading Terrain Reconstruction
+## Sample Images
+    You may put the images, you want to try into src_images/
 
-This project implements a fast shape-from-shading algorithm to reconstruct 3D terrain from 2D grayscale images. It uses SVD-based image filtering, gradient-based normal map estimation, shading simulation, and a Poisson solver for surface integration.
+![alt text](src_images/0.png)
 
-## Features
-- Custom SVD image compression and filtering
-- Normal map computation from image gradients
-- Lambertian shading simulation
-- Fast Poisson solver using FFT for depth map recovery
-- 3D terrain visualization with matplotlib
+    example of an image
 
-## Requirements
-- Python 3.7+
-- NumPy
-- OpenCV (cv2)
-- Matplotlib
-- SciPy
 
-## Usage
-1. Place your image(s) in the `src_images/` directory.
-2. Run the script:
-```bash
-python your_script_name.py
-```
-3. Results will be saved to the `result_data/` directory, including 3D plots and depth map data.
+## How It Works
 
-## Example
-```python
-image_path = "src_images/image0.png"
-main(image_path, k=50, cut_level=0.2)
-```
+    Load and optionally filter image using SVD.
 
-## Performance Evaluation
-The script also includes performance metrics:
-- Execution time
-- Surface standard deviation (variation in depth)
+    Compute gradients and derive surface normals.
 
-Metrics are plotted for visual comparison.
+    Estimate shading via dot product with light direction.
 
-## File Overview
-- `custom_svd`: Custom singular value decomposition logic (imported from `svd.py`)
-- `main()`: Entry point for processing and visualization
-- `plot_terrain_3d()`: Renders 3D terrain
-- `fast_shape_from_shading()`: Core shading-to-shape algorithm
+    Recover surface height map using Poisson integration.
 
-## Output
-- `terrain_3d.png`: 3D plot of the reconstructed surface
-- `depth_map.npy`: Raw depth data for further analysis
----
+    Visualize the 3D terrain using matplotlib
 
+
+## Output Samples
+
+    Results are saved to the ```result_data/``` folder:
+
+        depth_map.npy: Reconstructed depth values
+
+        terrain_3d.png: Elevation surface plot
+
+
+## Authors 
+    Nazarii Dizhak
+    Vitalii Lutsyk
+    Student Edward

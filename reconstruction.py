@@ -5,6 +5,8 @@ import cv2
 import os
 from scipy import fftpack
 from svd import custom_svd
+import time
+
 
 def load_image(image_path):
     """Simple image loading function."""
@@ -19,7 +21,6 @@ def load_image(image_path):
 
 def fast_svd_filter(image, k=50):
     """Fast SVD-based image filtering."""
-    # U, sigma, Vt = np.linalg.svd(image, full_matrices=False)
     U, sigma, Vt = custom_svd(image)
 
     
@@ -140,42 +141,78 @@ def plot_terrain_3d(depth_map, subsample=4, scale_factor=0.5, cut_level=None):
     
     fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5, label='Elevation')
     
-    # Set labels
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Elevation")
     
-    # Set view angle
     ax.view_init(elev=35, azim=45)
     
     plt.tight_layout()
-    plt.savefig("terrain_3d.png", dpi=300)
+    plt.savefig("result_data/terrain_3d.png", dpi=300)
     plt.show()
 
 def main(image_path, k=50, cut_level=None):
     """Main function to process an image and generate terrain."""
-    # Load and filter image
     print(f"Loading and preprocessing image: {image_path}")
     image = load_image(image_path)
     filtered_image = fast_svd_filter(image, k)
     
-    # Apply shape from shading
     print("Generating terrain from image...")
     normal_map, shading, depth_map = fast_shape_from_shading(filtered_image)
     
-    # Save depth map
-    np.save("depth_map.npy", depth_map)
+    np.save("result_data/depth_map.npy", depth_map)
     
-    # Visualize terrain
     print("Creating 3D visualization...")
     plot_terrain_3d(depth_map, cut_level=cut_level)
     
     print("Done! The terrain has been reconstructed and saved.")
     return depth_map
 
+
 if __name__ == "__main__":
 
-    image_path = "0.png"
-    
+    # image_path = "src_images/0.png"
+    # main(image_path, k=50, cut_level=0.2) 
 
-    main(image_path, k=50, cut_level=0.2) 
+    def measure_performance(image_path, k=50, cut_level=None):
+        start_time = time.time()
+        depth_map = main(image_path, k, cut_level)
+        end_time = time.time()
+        
+        execution_time = end_time - start_time
+        surface_std = np.std(depth_map)
+        
+        return execution_time, surface_std
+
+    
+    image_paths = ["src_images/image0.png", "src_images/image1.png"]
+    names = ["Image 0", "Image 1"]
+
+    times = []
+    stds = []
+
+
+    for path in image_paths:
+        image = load_image(path)
+        
+        exec_time, std_dev = measure_performance(path, k=50, cut_level=0.2)
+        
+        times.append(exec_time)
+        stds.append(std_dev)
+
+    def plot_metrics(names, times, stds, edge_densities, entropies):
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+        # Execution time
+        axes[0].bar(names, times, color='skyblue')
+        axes[0].set_title("Execution Time")
+        axes[0].set_ylabel("Time (s)")
+
+        # Surface variation
+        axes[1].bar(names, stds, color='lightgreen')
+        axes[1].set_title("Surface Variation (std dev of depth)")
+        axes[1].set_ylabel("Depth Std Dev")
+
+        plt.tight_layout()
+        plt.show()
+
